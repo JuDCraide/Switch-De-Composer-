@@ -1,0 +1,20 @@
+[
+    {
+        "switchname": "s1",
+        "modules": "all",
+        "filename": "obs_main.up4",
+        "template": "../templates/common_ethernet_template.up4"
+    },
+    {
+        "switchname": "s2",
+        "modules": "ipv4",
+        "filename": "obs_main.up4",
+        "template": "../templates/common_ethernet_template.up4"
+    },
+    {
+        "switchname": "s3",
+        "modules": "ipv6",
+        "filename": "obs_main.up4",
+        "template": "../templates/common_ethernet_template.up4"
+    }
+]
