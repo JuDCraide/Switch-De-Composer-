@@ -84,5 +84,12 @@ if(startMininet):
         f.write(line)
     f.write('"\n')
 
-    f.write('echo -e "*********************************\\n${normal}"\n')
-    f.close()
+f.write('\necho -e "*********************************\\n${normal}"\n')
+f.write('echo -e "\\n Remove Intermediarte Files \\n"\n')
+f.write('rm *.json\n')
+f.write('rm *.p4i\n')
+f.write('rm *.p4rt\n')
+f.write('rm s*.up4\n')
+
+f.write('\necho -e "\\n*********************************"\n')
+f.close()
