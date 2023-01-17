@@ -3,6 +3,7 @@ import json
 with open('topology-json/topology_e1.json', 'r') as file:
     topology = json.load(file)
 
+startMininet = True 
 destination = "./example-julia/generated_distribute_programs.sh"
 allModulesTopology1 = ["ipv4", "ipv6"]
 allModulesTopology2 = ["ipv4_nat_acl","ipv4", "ipv6"]
@@ -64,23 +65,31 @@ for switch in topology:
     line = '../p4c-compile.sh {0}_{1}_main_v1model.p4\n'.format(switch["switchname"], switch["modulesString"])
     f.write(line)
 
-f.write('\nbold=$(tput bold)\n')
-f.write('normal=$(tput sgr0)\n')
+if(startMininet):
+    f.write('\nbold=$(tput bold)\n')
+    f.write('normal=$(tput sgr0)\n')
 
-f.write('\nBMV2_MININET_PATH=${UP4ROOT}/extensions/csa/obs-examples/simple-topo\n')
-f.write('BMV2_SIMPLE_SWITCH_BIN=${UP4ROOT}/extensions/csa/msa-examples/bmv2/targets/simple_switch/simple_switch\n')
+    f.write('\nBMV2_MININET_PATH=${UP4ROOT}/extensions/csa/obs-examples/simple-topo\n')
+    f.write('BMV2_SIMPLE_SWITCH_BIN=${UP4ROOT}/extensions/csa/msa-examples/bmv2/targets/simple_switch/simple_switch\n')
 
-f.write('\nP4_MININET_PATH=${UP4ROOT}/extensions/csa/msa-examples/bmv2/mininet\n')
+    f.write('\nP4_MININET_PATH=${UP4ROOT}/extensions/csa/msa-examples/bmv2/mininet\n')
 
-f.write('\necho -e "${bold}\\n*********************************"\n')
-f.write('echo -e "Running Tutorial program: obs_example_v1model${normal}"\n')
-f.write('sudo bash -c "export P4_MININET_PATH=${P4_MININET_PATH} ;  \\ \n')
-f.write('  $BMV2_MININET_PATH/obs_simple_topo_v1model_sw.py --behavioral-exe $BMV2_SIMPLE_SWITCH_BIN \\ \n')
-f.write('  --num-hosts 4 ')
-for i, switch in enumerate(topology):
-    line = '--json{0} ./{1}_{2}_main_v1model.json '.format( i+1, switch["switchname"], switch["modulesString"])
-    f.write(line)
-f.write('"\n')
+    f.write('\necho -e "${bold}\\n*********************************"\n')
+    f.write('echo -e "Running Tutorial program: obs_example_v1model${normal}"\n')
+    f.write('sudo bash -c "export P4_MININET_PATH=${P4_MININET_PATH} ;  \\ \n')
+    f.write('  $BMV2_MININET_PATH/obs_simple_topo_v1model_sw.py --behavioral-exe $BMV2_SIMPLE_SWITCH_BIN \\ \n')
+    f.write('  --num-hosts 4 ')
+    for i, switch in enumerate(topology):
+        line = '--json{0} ./{1}_{2}_main_v1model.json '.format( i+1, switch["switchname"], switch["modulesString"])
+        f.write(line)
+    f.write('"\n')
 
-f.write('echo -e "*********************************\\n${normal}"\n')
+f.write('\necho -e "*********************************\\n${normal}"\n')
+f.write('echo -e "\\n Remove Intermediarte Files \\n"\n')
+f.write('rm *.json\n')
+f.write('rm *.p4i\n')
+f.write('rm *.p4rt\n')
+f.write('rm s*.up4\n')
+
+f.write('\necho -e "\\n*********************************"\n')
 f.close()

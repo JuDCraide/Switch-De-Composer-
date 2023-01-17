@@ -56,7 +56,7 @@ cpackage OneBigSwitchExample : implements Unicast<hdr_t, empty_t,
     //@ModuleInstantiateEnd("ipv4")
     //@ModuleInstantiateBegin("ipv6")
     IPv6() ipv6_i;
-    //@ModuleInstantiateEnd("ipv4")
+    //@ModuleInstantiateEnd("ipv6")
 
     //@ModuleInstantiateBegin("ipv4_nat")
     IPv4NatACL() ipv4_nat_acl_i;
