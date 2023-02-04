@@ -1,3 +1,4 @@
 /example-julia/*
 !*.gitkeep
 __pycache__/*
+*.pyc
