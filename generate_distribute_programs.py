@@ -20,7 +20,7 @@ f.write('sudo mn -c\n')
 f.write('\necho -e "\\n*********************************"\n')
 f.write('echo -e "\\n Generating switch programs with a template "\n')
 
-for switch in topology:
+for switch in topology["switches"]:
     line = 'python ../generate_switch_program_w_template.py --switchname {0} --modules {1} --filename {2} --template {3}\n'.format(
         switch["switchname"],
         switch["modules"],
@@ -48,7 +48,7 @@ for module in modules:
 
 f.write('\necho -e "\\n*********************************"\n')
 f.write('echo -e "\\n Compiling uP4 main programs \\n"\n')
-for switch in topology:
+for switch in topology["switches"]:
     submodules = ""
     for i, module in enumerate(switch["modulesParsed"]):
         submodules += module + ".json"
@@ -63,7 +63,7 @@ for switch in topology:
 
 f.write('\necho -e "\\n*********************************"\n')
 f.write('echo -e "\\n Compiling P4 programs "\n')
-for switch in topology:
+for switch in topology["switches"]:
     line = '../p4c-compile.sh {0}_{1}_main_v1model.p4\n'.format(switch["switchname"], switch["modulesString"])
     f.write(line)
 
@@ -79,7 +79,7 @@ if(startMininet):
     f.write('\necho -e "${bold}\\n*********************************"\n')
     f.write('echo -e "Running Tutorial program: obs_example_v1model${normal}"\n')
     f.write('sudo bash -c "export P4_MININET_PATH=${P4_MININET_PATH}; ${BMV2_MININET_PATH}obs_simple_topo_v1model_sw.py --behavioral-exe $BMV2_SIMPLE_SWITCH_BIN --num-hosts 4 ')
-    for i, switch in enumerate(topology):
+    for i, switch in enumerate(topology["switches"]):
         line = '--json{0} ./{1}_{2}_main_v1model.json '.format( i+1, switch["switchname"], switch["modulesString"])
         f.write(line)
     f.write('"\n')
