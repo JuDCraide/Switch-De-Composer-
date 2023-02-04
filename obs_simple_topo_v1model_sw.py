@@ -67,9 +67,10 @@ class MultipleSwitchTopo(Topo):
 
         switches = dict()
         for switch in topology["switches"]:
+            path = './' + switch["switchname"] + '_' + switch["modules"].replace(",","_") + '_main_v1model.json'
             switches[switch["switchname"]] = self.addSwitch(switch["switchname"],
                                              sw_path = sw_path,
-                                             json_path = './' + switch["switchname"] + '_' + switch["modules"].replace(",","_") + '_main_v1model.p4',
+                                             json_path = path,
                                              thrift_port = thrift_port,
                                              pcap_dump = pcap_dump,
                                              log_console = True,
@@ -78,7 +79,7 @@ class MultipleSwitchTopo(Topo):
         for i, host in enumerate(topology["hosts"]):
             temphost = self.addHost(host["hostname"],
                                     cls = IPv6Node,  
-                                    ipv6='20%02x::1/64' %(i), 
+                                    ipv6='202%01x::1/64' %(i), 
                                     ip = "10.0.%d.1/24" %(i),
                                     mac = '00:00:00:00:00:%02x' %(i))
             self.addLink(temphost, switches[host["switchname"]])
@@ -109,8 +110,8 @@ def main():
     sw_mac = ["00:aa:bb:00:00:%02x" % (n+1) for n in xrange(num_hosts)]
     sw_addr = ["10.0.%d.1" % (n+1) for n in xrange(num_hosts)]
     gw_addr = ["10.0.%d.254" % (n+1) for n in xrange(num_hosts)]
-    sw_addr6 = ["202%d::1" % (n+1) for n in xrange(num_hosts)]
-    gw_addr6 = ["202%d::10" % (n+1) for n in xrange(num_hosts)]
+    sw_addr6 = ["202%01x::1" % (n+1) for n in xrange(num_hosts)]
+    gw_addr6 = ["202%01x::10" % (n+1) for n in xrange(num_hosts)]
 
     for n in xrange(num_hosts):
         h = net.get('h%d' % (n + 1))
@@ -126,7 +127,7 @@ def main():
 
     sleep(3)
 
-    print "Ready !" + args.json1 + " - " + args.json2 + " - " + args.json3
+    print "Ready !"
 
     print "Ipv6 ping command"
     print "h1 ping -6 2001::2"
