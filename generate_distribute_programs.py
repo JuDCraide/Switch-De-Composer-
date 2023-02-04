@@ -1,7 +1,8 @@
 import json
 import os
 
-with open('topology-json/topology_e1.json', 'r') as file:
+topologyJsonLocation = 'topology-json/topology_e1.json'
+with open(topologyJsonLocation, 'r') as file:
     topology = json.load(file)
 
 startMininet = True 
@@ -78,10 +79,11 @@ if(startMininet):
 
     f.write('\necho -e "${bold}\\n*********************************"\n')
     f.write('echo -e "Running Tutorial program: obs_example_v1model${normal}"\n')
-    f.write('sudo bash -c "export P4_MININET_PATH=${P4_MININET_PATH}; ${BMV2_MININET_PATH}obs_simple_topo_v1model_sw.py --behavioral-exe $BMV2_SIMPLE_SWITCH_BIN --num-hosts 4 ')
-    for i, switch in enumerate(topology["switches"]):
-        line = '--json{0} ./{1}_{2}_main_v1model.json '.format( i+1, switch["switchname"], switch["modulesString"])
-        f.write(line)
+    f.write('sudo bash -c "')
+    f.write('export P4_MININET_PATH=${P4_MININET_PATH}; ')
+    f.write('${BMV2_MININET_PATH}obs_simple_topo_v1model_sw.py ')
+    f.write('--behavioral-exe $BMV2_SIMPLE_SWITCH_BIN ')
+    f.write(f'--topology-json {os.getcwd()}/{topologyJsonLocation}')
     f.write('"\n')
 
 f.write('\necho -e "*********************************\\n${normal}"\n')
