@@ -5,7 +5,7 @@ topologyJsonLocation = f'{os.getcwd()}/topology-json/topology_e1.json'
 with open(topologyJsonLocation, 'r') as file:
     topology = json.load(file)
 
-startMininet = True 
+startMininet = False 
 destination = "./example-julia/generated_distribute_programs.sh"
 allModulesTopology1 = ["ipv4", "ipv6"]
 allModulesTopology2 = ["ipv4_nat_acl","ipv4", "ipv6"]
@@ -18,10 +18,11 @@ f.write(f"export SWITCHDECOMPOSER={os.getcwd()}\n")
 f.write("export UP4ROOT=${SWITCHDECOMPOSER}/obs-microp4\n")
 
 f.write('sudo mn -c\n')
-f.write('\necho -e "\\n*********************************"\n')
-f.write('echo -e "\\n Generating switch programs with a template "\n')
 
 for switch in topology["switches"]:
+    f.write('\necho -e "\\n*********************************"\n')
+    f.write(f'echo -e "\\n Generating {switch["switchname"]} up4 program "\n')
+
     line = 'python ../generate_switch_program_w_template.py --switchname {0} --modules {1} --filename {2} --topology {3}\n'.format(
         switch["switchname"],
         switch["modules"],
@@ -40,16 +41,13 @@ for switch in topology["switches"]:
         else:
             modules.add(module)
 
-f.write('\necho -e "\\n*********************************"\n')
-f.write('echo -e "\\n Compiling uP4 includes "\n')
-for module in modules:
-    fixedPart = "${UP4ROOT}/build/p4c-msa -I ${UP4ROOT}/build/p4include"
-    line = '{0} -o {1}.json {2}.up4\n'.format(fixedPart, module, module)
-    f.write(line)
+    f.write(f'\necho -e "\\n Compiling uP4 includes for {switch["switchname"]}"\n')
+    for module in modules:
+        fixedPart = "${UP4ROOT}/build/p4c-msa -I ${UP4ROOT}/build/p4include"
+        line = '{0} -o {1}.json {2}.up4\n'.format(fixedPart, module, module)
+        f.write(line)
 
-f.write('\necho -e "\\n*********************************"\n')
-f.write('echo -e "\\n Compiling uP4 main programs \\n"\n')
-for switch in topology["switches"]:
+    f.write(f'\necho -e "\\n Compiling uP4 {switch["switchname"]} main program \\n"\n')
     submodules = ""
     for i, module in enumerate(switch["modulesParsed"]):
         submodules += module + ".json"
@@ -61,6 +59,7 @@ for switch in topology["switches"]:
     line = '{0} --target-arch v1model -I {1}  -l {2}{3}_{4}_main.up4\n'.format(
         p4cMsa, p4include, submodules, switch["switchname"], switch["modules"])
     f.write(line)
+
 
 f.write('\necho -e "\\n*********************************"\n')
 f.write('echo -e "\\n Compiling P4 programs "\n')
