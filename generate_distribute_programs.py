@@ -5,11 +5,12 @@ topologyJsonLocation = f'{os.getcwd()}/topology-json/topology_e1.json'
 with open(topologyJsonLocation, 'r') as file:
     topology = json.load(file)
 
-startMininet = False 
-destination = "./example-julia/generated_distribute_programs.sh"
+startMininet = True 
 allModulesTopology1 = ["ipv4", "ipv6"]
 allModulesTopology2 = ["ipv4_nat_acl","ipv4", "ipv6"]
 allModules = allModulesTopology1
+output_folder = f'{os.getcwd()}/outputs'
+destination = f"{output_folder}/generated_distribute_programs.sh"
 modules = set()
 
 f = open(destination, "w+")
@@ -23,11 +24,12 @@ for switch in topology["switches"]:
     f.write('\necho -e "\\n*********************************"\n')
     f.write(f'echo -e "\\n Generating {switch["switchname"]} up4 program "\n')
 
-    line = 'python ../generate_switch_program_w_template.py --switchname {0} --modules {1} --filename {2} --topology {3}\n'.format(
+    line = 'python ../generate_switch_program_w_template.py --switchname {0} --modules {1} --filename {2} --topology {3} --output-folder {4}\n'.format(
         switch["switchname"],
         switch["modules"],
         switch["filename"],
         topologyJsonLocation,
+        output_folder,
     )
     f.write(line)
     switch["modulesString"] = switch["modules"].replace(",","_")
