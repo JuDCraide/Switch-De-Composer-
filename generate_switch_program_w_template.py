@@ -16,15 +16,11 @@ args = parser.parse_args()
 
 obs_program = open(args.filename, "r")
 topology = open(args.topology, "r")
-
+lines = []
 if args.modules == 'all':
     with obs_program as t:
-        all_code = t.read()
-    output = open(args.switchname + "_" + args.modules  + "_main.up4", "w")
-    output.write(all_code)
-    output.close()
+        lines = t.read()
 else:
-
     edges = [('ethernet', 'ipv4'), ('ethernet', 'ipv6'), ('ipv4', 'ipv4_nat'), ('ipv6', ''), ('ipv4_nat', '')]
     graph = Graph(edges, directed=True)
 
@@ -38,11 +34,7 @@ else:
         # print(dependencies)
 
     dependencies.add('all')
-
-    print(dependencies)
         
-    lines = []
-
     with open(args.filename, "r") as file:
         can_write = True
         for line in file:
@@ -73,10 +65,11 @@ else:
             if(can_write):
                 lines.append(line)
     
-    output = open(args.switchname + "_" + args.modules  + "_main.up4", "w")
-    for l in lines:
-        if '@Module' in l:
-            continue
-        else:
-            output.write(l)
-    output.close()
+output = open(args.switchname + "_" + args.modules  + "_main.up4", "w")
+for l in lines:
+    if '@Module' in l:
+        continue
+    else:
+        output.write(l)
+output.close()
+
