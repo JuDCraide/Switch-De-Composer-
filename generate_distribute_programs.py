@@ -1,7 +1,7 @@
 import json
 import os
 
-topologyJsonLocation = 'topology-json/topology_e1.json'
+topologyJsonLocation = f'{os.getcwd()}/topology-json/topology_e1.json'
 with open(topologyJsonLocation, 'r') as file:
     topology = json.load(file)
 
@@ -22,11 +22,11 @@ f.write('\necho -e "\\n*********************************"\n')
 f.write('echo -e "\\n Generating switch programs with a template "\n')
 
 for switch in topology["switches"]:
-    line = 'python ../generate_switch_program_w_template.py --switchname {0} --modules {1} --filename {2} --template {3}\n'.format(
+    line = 'python ../generate_switch_program_w_template.py --switchname {0} --modules {1} --filename {2} --topology {3}\n'.format(
         switch["switchname"],
         switch["modules"],
         switch["filename"],
-        switch["template"],
+        topologyJsonLocation,
     )
     f.write(line)
     switch["modulesString"] = switch["modules"].replace(",","_")
@@ -83,7 +83,7 @@ if(startMininet):
     f.write('export P4_MININET_PATH=${P4_MININET_PATH}; ')
     f.write('${BMV2_MININET_PATH}obs_simple_topo_v1model_sw.py ')
     f.write('--behavioral-exe $BMV2_SIMPLE_SWITCH_BIN ')
-    f.write(f'--topology-json {os.getcwd()}/{topologyJsonLocation}')
+    f.write(f'--topology-json {topologyJsonLocation}')
     f.write('"\n')
 
 f.write('\necho -e "*********************************\\n${normal}"\n')

@@ -9,13 +9,13 @@ parser.add_argument('--modules', help='Name of the modules that will be added to
                     type=str, action="store", required=True)
 parser.add_argument('--filename', help='Name of the OBS program that has the module',
                     type=str, action="store", required=True)
-parser.add_argument('--template', help='Name of the template that will be used as base of the program',
+parser.add_argument('--topology', help='Path to json topology config file',
                     type=str, action="store", required=True)
 
 args = parser.parse_args()
 
 obs_program = open(args.filename, "r")
-template = open(args.template, "r")
+topology = open(args.topology, "r")
 
 if args.modules == 'all':
     with obs_program as t:
