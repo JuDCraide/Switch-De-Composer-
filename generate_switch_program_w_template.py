@@ -40,53 +40,43 @@ else:
     dependencies.add('all')
 
     print(dependencies)
-    
-    write_declare = False
-    declare = []
+        
+    lines = []
 
-    write_instantiate = False
-    instantiate = []
-
-    write_invoke = False
-    invoke = []
-
-    # read one big switch program and get module declare, instance and invoke
-    with obs_program as file:
+    with open(args.filename, "r") as file:
+        can_write = True
         for line in file:
+            if '@ModuleDeclareBegin' in line:
+                if any('@ModuleDeclareBegin(\"'+word+'\")' in line for word in dependencies):
+                    can_write = True
+                else:
+                    can_write = False
+            if '@ModuleDeclareEnd' in line:
+                can_write = True
 
-            if any('@ModuleDeclareEnd(\"'+word+'\")' in line for word in dependencies):
-                write_declare = False
-            
-            if write_declare:
-                declare.append(line)
+            if '@ModuleInstantiateBegin' in line:
+                if any('@ModuleInstantiateBegin(\"'+word+'\")' in line for word in dependencies):
+                    can_write = True
+                else:
+                    can_write = False
+            if '@ModuleInstantiateEnd' in line:
+                can_write = True
+                        
+            if '@ModuleInvokeBegin' in line:
+                if any('@ModuleInvokeBegin(\"'+word+'\")' in line for word in dependencies):
+                    can_write = True
+                else:
+                    can_write = False
+            if '@ModuleInvokeEnd' in line:
+                can_write = True
 
-            if any('@ModuleDeclareBegin(\"'+word+'\")' in line for word in dependencies):
-                write_declare = True
-
-            if any('@ModuleInstantiateEnd(\"'+word+'\")' in line for word in dependencies):
-                write_instantiate = False
-            
-            if write_instantiate:
-                instantiate.append(line)
-
-            if any('@ModuleInstantiateBegin(\"'+word+'\")' in line for word in dependencies):
-                write_instantiate = True
-
-            if any('@ModuleInvokeEnd(\"'+word+'\")' in line for word in dependencies):
-                write_invoke = False
-            
-            if write_invoke:
-                invoke.append(line)
-
-            if any('@ModuleInvokeBegin(\"'+word+'\")' in line for word in dependencies):
-                write_invoke = True
-
-    # read template and add program lines to new output file
-    with template as t:
-        new_code = t.read().replace('//module-declare', ''.join(declare))
-        new_code = new_code.replace('//module-instantiate', ''.join(instantiate))
-        new_code = new_code.replace('//module-invoke', ''.join(invoke))
-
-        output = open(args.switchname + "_" + args.modules  + "_main.up4", "w")
-        output.write(new_code)
-        output.close()
+            if(can_write):
+                lines.append(line)
+    
+    output = open(args.switchname + "_" + args.modules  + "_main.up4", "w")
+    for l in lines:
+        if '@Module' in l:
+            continue
+        else:
+            output.write(l)
+    output.close()
