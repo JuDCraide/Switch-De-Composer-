@@ -2,6 +2,7 @@ import sys
 import argparse
 from graph_class import Graph
 import json
+from ip_functions import ConvertIpToInt, ConvertIpToHex
 
 parser = argparse.ArgumentParser(description='One Big Switch program generation')
 parser.add_argument('--switchname', help='Name of the switch that will receive the program',
@@ -17,7 +18,6 @@ parser.add_argument('--output-folder', help='Path to output up4 files',
 
 args = parser.parse_args()
 
-
 topology = open(args.topology, "r")
 
 with open(args.topology, 'r') as file:
@@ -30,19 +30,19 @@ output_folder = args.output_folder
 #ethernet table
 eth_table = ""
 for host in hosts:
-    eth_table += "(%s) : forward(%s, %s, %s); \n" % (host["port"],host["mac"],switch["mac"],host["port"])
+    eth_table += "(%s) : forward(%s, %s, %s); \n" % (host["port"], ConvertIpToHex(host["mac"]), ConvertIpToHex(switch["mac"]), host["port"])
 #print(eth_table)
 
 #ipv4 table
 ipv4_table = ""
 for host in hosts:
-    ipv4_table += "(%s, _): process(%s); \n" % (host["ipv4"],host["port"])
+    ipv4_table += "(%s, _): process(%s); \n" % (ConvertIpToInt(host["ipv4"]),host["port"])
 #print(ipv4_table)
 
 #ipv6 table
 ipv6_table = ""
 for host in hosts:
-    ipv6_table += "(%s, _, _): process(%s); \n" % (host["ipv6"],host["port"])
+    ipv6_table += "(%s, _, _): process(%s); \n" % (ConvertIpToHex(host["ipv6"]),host["port"])
 #print(ipv6_table)
 
 # Ethernet

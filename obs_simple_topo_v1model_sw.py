@@ -35,16 +35,8 @@ parser.add_argument('--behavioral-exe', help='Path to behavioral executable',
                     type=str, action="store", required=True)
 parser.add_argument('--thrift-port', help='Thrift server port for table updates',
                     type=int, action="store", default=9090)
-# parser.add_argument('--num-hosts', help='Number of hosts to connect to switch',
-#                     type=int, action="store", default=2)
 parser.add_argument('--topology-json', help='Path to json topology config file',
-                     type=str, action="store", required=True)                  
-# parser.add_argument('--json1', help='Path to JSON1 config file',
-#                     type=str, action="store", required=True)
-# parser.add_argument('--json2', help='Path to JSON2 config file',
-#                     type=str, action="store", required=True)
-# parser.add_argument('--json3', help='Path to JSON3 config file',
-#                     type=str, action="store", required=True)
+                     type=str, action="store", required=True)
 parser.add_argument('--pcap-dump', help='Dump packets on interfaces to pcap files',
                     type=str, action="store", required=False, default=False)
 
@@ -66,12 +58,12 @@ class MultipleSwitchTopo(Topo):
         Topo.__init__(self, **opts)
 
         switches = dict()
-        for switch in topology["switches"]:
+        for i, switch in enumerate(topology["switches"]):
             path = './' + switch["switchname"] + '_' + switch["modules"].replace(",","_") + '_main_v1model.json'
             switches[switch["switchname"]] = self.addSwitch(switch["switchname"],
                                              sw_path = sw_path,
                                              json_path = path,
-                                             thrift_port = thrift_port,
+                                             thrift_port = thrift_port + i,
                                              pcap_dump = pcap_dump,
                                              log_console = True,
                                              enable_debugger = True)
@@ -79,15 +71,14 @@ class MultipleSwitchTopo(Topo):
         for i, host in enumerate(topology["hosts"]):
             temphost = self.addHost(host["hostname"],
                                     cls = IPv6Node,  
-                                    ipv6='202%01x::1/64' %(i), 
-                                    ip = "10.0.%d.1/24" %(i),
-                                    mac = '00:00:00:00:00:%02x' %(i))
+                                    ipv6= host["ipv6"], #+ "/64",
+                                    ip = host["ipv4"], #+ "/24",
+                                    mac = host["mac"])
             self.addLink(temphost, switches[host["switchname"]])
 
         for link in topology["swichlink"]:
             self.addLink( switches[link[0]], switches[link[1]]) 
            
-
 
 def main():
 
