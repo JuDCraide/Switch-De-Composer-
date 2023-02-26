@@ -2,7 +2,8 @@ import sys
 import argparse
 from graph_class import Graph
 import json
-from ip_functions import ConvertIpToInt, ConvertIpToHex
+from ip_functions import ConvertIpToInt, ConvertIpToHex, ConvertMacToHex
+from replace_regex import replaceWithRegex
 
 parser = argparse.ArgumentParser(description='One Big Switch program generation')
 parser.add_argument('--switchname', help='Name of the switch that will receive the program',
@@ -30,7 +31,7 @@ output_folder = args.output_folder
 #ethernet table
 eth_table = ""
 for host in hosts:
-    eth_table += "(%s) : forward(%s, %s, %s); \n" % (host["port"], ConvertIpToHex(host["mac"]), ConvertIpToHex(switch["mac"]), host["port"])
+    eth_table += "(%s) : forward(%s, %s, %s); \n" % (host["port"], ConvertMacToHex(host["mac"]), ConvertMacToHex(switch["mac"]), host["port"])
 #print(eth_table)
 
 #ipv4 table
@@ -48,21 +49,24 @@ for host in hosts:
 # Ethernet
 with open('../modules/obs_main_x.up4', 'r') as file :
   filedata = file.read()
-filedata = filedata.replace('//@TableInstantiate("ethernet")', eth_table)
+#filedata = filedata.replace('//@TableInstantiate("ethernet")', eth_table)
+filedata = replaceWithRegex("ethernet", filedata, eth_table)
 with open(output_folder + '/obs_main.up4', 'w') as file:
   file.write(filedata)
 
 # IPv4
 with open('../modules/ipv4_x.up4', 'r') as file :
   filedata = file.read()
-filedata = filedata.replace('//@TableInstantiate("ipv4")', ipv4_table)
+#filedata = filedata.replace('//@TableInstantiate("ipv4")', ipv4_table)
+filedata = replaceWithRegex("ipv4", filedata, ipv4_table)
 with open(output_folder + '/ipv4.up4', 'w') as file:
   file.write(filedata)
 
 # IPv6
 with open('../modules/ipv6_x.up4', 'r') as file :
   filedata = file.read()
-filedata = filedata.replace('//@TableInstantiate("ipv6")', ipv6_table)
+#filedata = filedata.replace('//@TableInstantiate("ipv6")', ipv6_table)
+filedata = replaceWithRegex("ipv6", filedata, ipv6_table)
 with open(output_folder + '/ipv6.up4', 'w') as file:
   file.write(filedata)
 
@@ -122,6 +126,4 @@ for l in lines:
     if '//' not in l:
         output.write(l)
 output.close()
-
-
 
