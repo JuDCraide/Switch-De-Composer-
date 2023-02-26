@@ -48,7 +48,12 @@ cpackage OneBigSwitchExample : implements Unicast<hdr_t, empty_t,
         } 
         actions = { forward; }
         const entries = {
-            //@TableInstantiate("ethernet")
+            //@TableInstantiateBegin("ethernet")
+            (next_hop_eth1) : forward(mac_h1, mac_s1, eth1);
+            (next_hop_eth2) : forward(mac_h2, mac_s1, eth2);
+            (next_hop_eth3) : forward(mac_h3, mac_s1, eth3);
+            (next_hop_eth4) : forward(mac_h4, mac_s1, eth4);
+            //@TableInstantiateEnd("ethernet")
         }
         
     }

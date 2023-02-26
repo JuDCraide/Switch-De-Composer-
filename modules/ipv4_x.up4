@@ -52,7 +52,12 @@ cpackage IPv4 : implements Unicast<ipv4_hdr_t, empty_t, empty_t, bit<16>, empty_
       }
       const entries = {
         // v1model mininet suitable entries
-        //@TableInstantiate("ipv4")
+        //@TableInstantiateBegin("ipv4")
+        (h1_ipv4, _): process(eth1);
+        (h2_ipv4, _): process(eth2);
+        (h3_ipv4, _): process(eth3);
+        (h4_ipv4, _): process(eth4);
+        //@TableInstantiateEnd("ipv4")
       }
       default_action = default_act;
 
