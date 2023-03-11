@@ -1,5 +1,5 @@
 /example-julia/*
+/outputs/*
 !*.gitkeep
 __pycache__/*
 *.pyc
-/outputs/*
