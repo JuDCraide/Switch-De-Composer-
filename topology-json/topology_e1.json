@@ -4,21 +4,18 @@
             "switchname": "s1",
             "modules": "all",
             "filename": "obs_main.up4",
-            "template": "../templates/common_ethernet_template.up4",
             "mac" : "00:aa:bb:00:00:01"
         },
         {
             "switchname": "s2",
             "modules": "ipv4",
             "filename": "obs_main.up4",
-            "template": "../templates/common_ethernet_template.up4",
             "mac" : "00:aa:bb:00:00:02"
         },
         {
             "switchname": "s3",
             "modules": "ipv6",
             "filename": "obs_main.up4",
-            "template": "../templates/common_ethernet_template.up4",
             "mac" : "00:aa:bb:00:00:03"
         }
     ],
@@ -57,7 +54,7 @@
             "port" : "4"
         }
     ],
-    "swichlink":[
+    "switchlink":[
         ["s1", "s2"],
         ["s1", "s3"]
     ]

@@ -76,7 +76,7 @@ class MultipleSwitchTopo(Topo):
                                     mac = host["mac"])
             self.addLink(temphost, switches[host["switchname"]])
 
-        for link in topology["swichlink"]:
+        for link in topology["switchlink"]:
             self.addLink( switches[link[0]], switches[link[1]]) 
            
 
