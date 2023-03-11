@@ -26,7 +26,7 @@ for switch in topology["switches"]:
     f.write('\necho -e "\\n*********************************"\n')
     f.write(f'echo -e "\\n Generating {switch["switchname"]} up4 program "\n')
 
-    line = 'python {}/src/generate_switch_program_w_template.py --switchname {} --modules {} --filename {} --topology {} --output-folder {}\n'.format(
+    line = 'python {}/src/generate_switch_program.py --switchname {} --modules {} --filename {} --topology {} --output-folder {}\n'.format(
         basePath,
         switch["switchname"],
         switch["modules"],
@@ -89,17 +89,16 @@ if(startMininet):
     f.write('echo -e "Running Tutorial program: obs_example_v1model${normal}"\n')
     f.write('sudo bash -c "')
     f.write('export P4_MININET_PATH=${P4_MININET_PATH}; ')
-    #f.write('${BMV2_MININET_PATH}obs_simple_topo_v1model_sw.py ')
-    f.write(f'{basePath}/src/obs_simple_topo_v1model_sw.py ')
+    f.write(f'{basePath}/src/topology_mininet.py ')
     f.write('--behavioral-exe $BMV2_SIMPLE_SWITCH_BIN ')
     f.write(f'--topology-json {topologyJsonLocation}')
     f.write('"\n')
 
 f.write('\necho -e "*********************************\\n${normal}"\n')
 f.write('echo -e "\\n Remove Intermediate Files \\n"\n')
-#f.write('rm *.json\n')
 f.write('rm *.p4i\n')
 f.write('rm *.p4rt\n')
+#f.write('rm *.json\n')
 #f.write('rm s*.up4\n')
 
 f.write('\necho -e "\\n*********************************"\n')
