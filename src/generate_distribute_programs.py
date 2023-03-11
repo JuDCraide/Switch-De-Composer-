@@ -1,5 +1,6 @@
 import json
 import os
+import subprocess
 
 basePath = os.getcwd()
 
@@ -7,7 +8,8 @@ topologyJsonLocation = f'{basePath}/topology-json/topology_e1.json'
 with open(topologyJsonLocation, 'r') as file:
     topology = json.load(file)
 
-startMininet = True 
+runMininet = True
+autoRun = True
 allModulesTopology1 = ["ipv4", "ipv6"]
 allModulesTopology2 = ["ipv4_nat_acl","ipv4", "ipv6"]
 allModules = allModulesTopology1
@@ -76,7 +78,7 @@ for switch in topology["switches"]:
     )
     f.write(line)
 
-if(startMininet):
+if(runMininet):
     f.write('\nbold=$(tput bold)\n')
     f.write('normal=$(tput sgr0)\n')
 
@@ -94,7 +96,7 @@ if(startMininet):
     f.write(f'--topology-json {topologyJsonLocation}')
     f.write('"\n')
 
-f.write('\necho -e "*********************************\\n${normal}"\n')
+f.write('\necho -e "\n*********************************\\n${normal}"\n')
 f.write('echo -e "\\n Remove Intermediate Files \\n"\n')
 f.write('rm *.p4i\n')
 f.write('rm *.p4rt\n')
@@ -105,3 +107,7 @@ f.write('\necho -e "\\n*********************************"\n')
 f.close()
 
 os.chmod(destination, 0o755)
+if(autoRun):
+    os.chdir(outputFolder)
+    os.system("ls")
+    os.system("bash -c ./generated_distribute_programs.sh")
