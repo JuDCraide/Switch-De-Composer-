@@ -1,4 +1,5 @@
 import sys
+import os
 import argparse
 from graph_class import Graph
 import json
@@ -28,6 +29,9 @@ switch = [x for x in topology["switches"] if x["switchname"] == args.switchname]
 hosts = [x for x in topology["hosts"] if x["switchname"] == args.switchname]
 output_folder = args.output_folder
 
+
+os.system(f"cp $SWITCHDECOMPOSER/modules/* {output_folder}")
+
 #ethernet table
 eth_table = ""
 for host in hosts:
@@ -47,7 +51,7 @@ for host in hosts:
 #print(ipv6_table)
 
 # Ethernet
-with open('../modules/obs_main_x.up4', 'r') as file :
+with open(output_folder + '/obs_main.up4', 'r') as file :
   filedata = file.read()
 #filedata = filedata.replace('//@TableInstantiate("ethernet")', eth_table)
 filedata = replaceWithRegex("ethernet", filedata, eth_table)
@@ -55,7 +59,7 @@ with open(output_folder + '/obs_main.up4', 'w') as file:
   file.write(filedata)
 
 # IPv4
-with open('../modules/ipv4_x.up4', 'r') as file :
+with open(output_folder + '/ipv4.up4', 'r') as file :
   filedata = file.read()
 #filedata = filedata.replace('//@TableInstantiate("ipv4")', ipv4_table)
 filedata = replaceWithRegex("ipv4", filedata, ipv4_table)
@@ -63,7 +67,7 @@ with open(output_folder + '/ipv4.up4', 'w') as file:
   file.write(filedata)
 
 # IPv6
-with open('../modules/ipv6_x.up4', 'r') as file :
+with open(output_folder + '/ipv6.up4', 'r') as file :
   filedata = file.read()
 #filedata = filedata.replace('//@TableInstantiate("ipv6")', ipv6_table)
 filedata = replaceWithRegex("ipv6", filedata, ipv6_table)
