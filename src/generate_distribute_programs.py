@@ -71,7 +71,7 @@ for switch in topology["switches"]:
 f.write('\necho -e "\\n*********************************"\n')
 f.write('echo -e "\\n Compiling P4 programs "\n')
 for switch in topology["switches"]:
-    line = '{}/p4c-compile.sh {}_{}_main_v1model.p4\n'.format(
+    line = '{}/src/p4c-compile.sh {}_{}_main_v1model.p4\n'.format(
         basePath,
         switch["switchname"], 
         switch["modulesString"]
@@ -109,5 +109,4 @@ f.close()
 os.chmod(destination, 0o755)
 if(autoRun):
     os.chdir(outputFolder)
-    os.system("ls")
     os.system("bash -c ./generated_distribute_programs.sh")
