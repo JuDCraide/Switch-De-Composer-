@@ -1,3 +1,6 @@
+SDCPATH=$(dirname "$(readlink -f "$0")")
+export UP4ROOT="${SDCPATH%/*}/obs-microp4"
+
 cd ${UP4ROOT}/extensions/csa/msa-examples/bmv2
 bash ./install_deps.sh
 ./autogen.sh
