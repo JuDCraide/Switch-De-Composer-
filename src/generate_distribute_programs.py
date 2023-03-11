@@ -1,7 +1,9 @@
 import json
 import os
 
-topologyJsonLocation = f'{os.getcwd()}/topology-json/topology_e1.json'
+basePath = os.getcwd()
+
+topologyJsonLocation = f'{basePath}/topology-json/topology_e1.json'
 with open(topologyJsonLocation, 'r') as file:
     topology = json.load(file)
 
@@ -9,13 +11,13 @@ startMininet = True
 allModulesTopology1 = ["ipv4", "ipv6"]
 allModulesTopology2 = ["ipv4_nat_acl","ipv4", "ipv6"]
 allModules = allModulesTopology1
-output_folder = f'{os.getcwd()}/outputs'
-destination = f"{output_folder}/generated_distribute_programs.sh"
+outputFolder = f'{basePath}/outputs2'
+destination = f"{outputFolder}/generated_distribute_programs.sh"
 modules = set()
 
 f = open(destination, "w+")
 
-f.write(f"export SWITCHDECOMPOSER={os.getcwd()}\n")
+f.write(f"export SWITCHDECOMPOSER={basePath}\n")
 f.write("export UP4ROOT=${SWITCHDECOMPOSER}/obs-microp4\n")
 
 f.write('sudo mn -c\n')
@@ -24,12 +26,13 @@ for switch in topology["switches"]:
     f.write('\necho -e "\\n*********************************"\n')
     f.write(f'echo -e "\\n Generating {switch["switchname"]} up4 program "\n')
 
-    line = 'python ../generate_switch_program_w_template.py --switchname {0} --modules {1} --filename {2} --topology {3} --output-folder {4}\n'.format(
+    line = 'python {}/src/generate_switch_program_w_template.py --switchname {} --modules {} --filename {} --topology {} --output-folder {}\n'.format(
+        basePath,
         switch["switchname"],
         switch["modules"],
         switch["filename"],
         topologyJsonLocation,
-        output_folder,
+        outputFolder,
     )
     f.write(line)
     switch["modulesString"] = switch["modules"].replace(",","_")
@@ -66,7 +69,11 @@ for switch in topology["switches"]:
 f.write('\necho -e "\\n*********************************"\n')
 f.write('echo -e "\\n Compiling P4 programs "\n')
 for switch in topology["switches"]:
-    line = '../p4c-compile.sh {0}_{1}_main_v1model.p4\n'.format(switch["switchname"], switch["modulesString"])
+    line = '{}/p4c-compile.sh {}_{}_main_v1model.p4\n'.format(
+        basePath,
+        switch["switchname"], 
+        switch["modulesString"]
+    )
     f.write(line)
 
 if(startMininet):
@@ -82,7 +89,8 @@ if(startMininet):
     f.write('echo -e "Running Tutorial program: obs_example_v1model${normal}"\n')
     f.write('sudo bash -c "')
     f.write('export P4_MININET_PATH=${P4_MININET_PATH}; ')
-    f.write('${BMV2_MININET_PATH}obs_simple_topo_v1model_sw.py ')
+    #f.write('${BMV2_MININET_PATH}obs_simple_topo_v1model_sw.py ')
+    f.write(f'{basePath}/src/obs_simple_topo_v1model_sw.py ')
     f.write('--behavioral-exe $BMV2_SIMPLE_SWITCH_BIN ')
     f.write(f'--topology-json {topologyJsonLocation}')
     f.write('"\n')
@@ -96,3 +104,5 @@ f.write('rm *.p4rt\n')
 
 f.write('\necho -e "\\n*********************************"\n')
 f.close()
+
+os.chmod(destination, 0o755)
