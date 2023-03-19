@@ -13,7 +13,7 @@ autoRun = True
 allModulesTopology1 = ["ipv4", "ipv6"]
 allModulesTopology2 = ["ipv4_nat_acl","ipv4", "ipv6"]
 allModules = allModulesTopology1
-outputFolder = f'{basePath}/outputs2'
+outputFolder = f'{basePath}/outputs'
 destination = f"{outputFolder}/generated_distribute_programs.sh"
 modules = set()
 

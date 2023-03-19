@@ -3,8 +3,9 @@ import os
 import argparse
 from graph_class import Graph
 import json
-from ip_functions import ConvertIpToInt, ConvertIpToHex, ConvertMacToHex
-from replace_regex import replaceWithRegex
+from specific_functions import Specific_functions
+#from ip_functions import ConvertIpToInt, ConvertIpToHex, ConvertMacToHex
+#from replace_regex import replaceWithRegex
 
 parser = argparse.ArgumentParser(description='One Big Switch program generation')
 parser.add_argument('--switchname', help='Name of the switch that will receive the program',
@@ -32,45 +33,28 @@ output_folder = args.output_folder
 
 os.system(f"cp $SWITCHDECOMPOSER/modules/* {output_folder}")
 
-#ethernet table
-eth_table = ""
-for host in hosts:
-    eth_table += "(%s) : forward(%s, %s, %s); \n" % (host["port"], ConvertMacToHex(host["mac"]), ConvertMacToHex(switch["mac"]), host["port"])
-#print(eth_table)
-
-#ipv4 table
-ipv4_table = ""
-for host in hosts:
-    ipv4_table += "(%s, _): process(%s); \n" % (ConvertIpToInt(host["ipv4"]),host["port"])
-#print(ipv4_table)
-
-#ipv6 table
-ipv6_table = ""
-for host in hosts:
-    ipv6_table += "(%s, _, _): process(%s); \n" % (ConvertIpToHex(host["ipv6"]),host["port"])
-#print(ipv6_table)
-
 # Ethernet
 with open(output_folder + '/obs_main.up4', 'r') as file :
   filedata = file.read()
-#filedata = filedata.replace('//@TableInstantiate("ethernet")', eth_table)
-filedata = replaceWithRegex("ethernet", filedata, eth_table)
+  function = getattr(Specific_functions, "ethernet")
+  filedata = function(filedata, hosts, switch)
 with open(output_folder + '/obs_main.up4', 'w') as file:
   file.write(filedata)
 
 # IPv4
 with open(output_folder + '/ipv4.up4', 'r') as file :
   filedata = file.read()
-#filedata = filedata.replace('//@TableInstantiate("ipv4")', ipv4_table)
-filedata = replaceWithRegex("ipv4", filedata, ipv4_table)
+  function = getattr(Specific_functions, "ipv4")
+  filedata = function(filedata, hosts, switch)
+
 with open(output_folder + '/ipv4.up4', 'w') as file:
   file.write(filedata)
 
 # IPv6
 with open(output_folder + '/ipv6.up4', 'r') as file :
   filedata = file.read()
-#filedata = filedata.replace('//@TableInstantiate("ipv6")', ipv6_table)
-filedata = replaceWithRegex("ipv6", filedata, ipv6_table)
+  function = getattr(Specific_functions, "ipv6")
+  filedata = function(filedata, hosts, switch)
 with open(output_folder + '/ipv6.up4', 'w') as file:
   file.write(filedata)
 
