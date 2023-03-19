@@ -1,6 +1,6 @@
 import json
 from graph_class import Graph
-from collections import deque
+from specific_functions import Specific_functions
 
 modules = ["x", "a", "b", "d"]
 
@@ -18,6 +18,10 @@ for module in dependencies:
 print(edges)
 graph = Graph(edges, head, directed=True)
 
+order_modules = graph.get_dependency_order(modules)
+print(order_modules)
 
-print(graph.get_dependency_order(modules))
-
+for module_name in order_modules:
+    module = next(obj for obj in dependencies if obj["name"] == module_name)
+    function = getattr(Specific_functions, module["function"])
+    function()
