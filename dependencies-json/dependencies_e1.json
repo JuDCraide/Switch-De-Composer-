@@ -1,0 +1,21 @@
+[
+    {
+        "name": "ethernet",
+        "file": "obs_main.up4",
+        "function": "",
+        "directDependencies": ["ipv4", "ipv6"],
+        "head":true
+    },
+    {
+        "name": "ipv4",
+        "file": "ipv4.up4",
+        "function": "",
+        "directDependencies": []
+    },
+    {
+        "name": "ipv6",
+        "file": "ipv6.up4",
+        "function": "",
+        "directDependencies": []
+    }
+]

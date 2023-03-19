@@ -1,11 +1,12 @@
 from collections import defaultdict
+from collections import deque
 
 class Graph(object):
-    def __init__(self, edges, directed=False):
+    def __init__(self, edges, head="ethernet", directed=True):
         self.adj = defaultdict(set)
         self.directed = directed
         self.add_edges(edges)
-
+        self.head = head
 
     def get_vertices(self):
         return list(self.adj.keys())
@@ -57,3 +58,32 @@ class Graph(object):
 
     def __getitem__(self, v):
         return self.adj[v]
+    
+
+    def bfs(self, q, visited, modules):
+        if not q:
+            return 
+
+        v = q.popleft()
+        print(v, q)
+
+        if v in modules and v not in visited:
+            visited.append(v)
+
+        for u in self.adj[v]:
+            if u not in visited and u in modules:
+                q.append(u)
+    
+        self.bfs(q, visited, modules)
+
+    def get_dependency_order(self, modules):
+        visited = []
+        q = deque()
+
+        q.append(self.head)
+        self.bfs(q, visited, modules)
+
+        if(len(visited) != len(modules)):
+            raise Exception("Missing module dependency on the switch configuration. Please ensure topology.json and dependencies.json are properly configured.")
+
+        return visited[::-1]
