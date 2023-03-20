@@ -8,14 +8,7 @@ topologyJsonLocation = f'{basePath}/topology-json/topology_e1.json'
 with open(topologyJsonLocation, 'r') as file:
     topology = json.load(file)
 
-dependenciesJsonLocation = f'{basePath}/dependencies-json/dependencies_e1.json'
-with open(dependenciesJsonLocation, 'r') as file:
-    dependencies = json.load(file)
-
-all=[]
-for module in dependencies:
-    if "head" in module.keys() and module["head"]: continue
-    all.append(module["name"])
+dependenciesPath = f'{basePath}/dependencies-json/'
 
 runMininet = True
 autoRun = True
@@ -31,6 +24,15 @@ f.write("export UP4ROOT=${SWITCHDECOMPOSER}/obs-microp4\n")
 f.write('sudo mn -c\n')
 
 for switch in topology["switches"]:
+    dependenciesJsonLocation = dependenciesPath + switch["dependencies"]
+    with open(dependenciesJsonLocation, 'r') as file:
+        dependencies = json.load(file)
+
+    all=[]
+    for module in dependencies:
+        if "head" in module.keys() and module["head"]: continue
+        all.append(module["name"])
+
     f.write('\necho -e "\\n*********************************"\n')
     f.write(f'echo -e "\\n Generating {switch["switchname"]} up4 program "\n')
 
