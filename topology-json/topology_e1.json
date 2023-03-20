@@ -2,20 +2,17 @@
     "switches": [
         {
             "switchname": "s1",
-            "modules": "all",
-            "filename": "obs_main.up4",
+            "modules": "all",            
             "mac" : "00:aa:bb:00:00:01"
         },
         {
             "switchname": "s2",
-            "modules": "ethernet,ipv4",
-            "filename": "obs_main.up4",
+            "modules": "ethernet,ipv4",            
             "mac" : "00:aa:bb:00:00:02"
         },
         {
             "switchname": "s3",
-            "modules": "ethernet,ipv6",
-            "filename": "obs_main.up4",
+            "modules": "ethernet,ipv6",            
             "mac" : "00:aa:bb:00:00:03"
         }
     ],

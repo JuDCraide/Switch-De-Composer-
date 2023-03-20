@@ -7,8 +7,8 @@ class Specific_functions(object):
         for host in hosts:
             eth_table += "(%s) : forward(%s, %s, %s); \n" % (host["port"], ConvertMacToHex(host["mac"]), ConvertMacToHex(switch["mac"]), host["port"])
         return replaceWithRegex("ethernet", filedata, eth_table)
-        
-        
+
+
     def ipv4(filedata, hosts, switch):
         ipv4_table = ""
         for host in hosts:
@@ -22,28 +22,3 @@ class Specific_functions(object):
             ipv6_table += "(%s, _, _): process(%s); \n" % (ConvertIpToHex(host["ipv6"]),host["port"])
         return replaceWithRegex("ipv6", filedata, ipv6_table)
         
-
-
-    def x():
-        print("x")
-        return
-
-    def a():
-        print("a")
-        return
-
-    def b():
-        print("b")
-        return
-
-    def c():
-        print("c")
-        return
-
-    def d():
-        print("d")
-        return
-
-    def e():
-        print("e")
-        return

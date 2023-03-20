@@ -12,8 +12,6 @@ parser.add_argument('--switchname', help='Name of the switch that will receive t
                     type=str, action="store", required=True)
 parser.add_argument('--modules', help='Name of the modules that will be added to the switch program',
                     type=str, action="store", required=True)
-parser.add_argument('--filename', help='Name of the OBS program that has the module',
-                    type=str, action="store", required=True)
 parser.add_argument('--topology', help='Path to json topology config file',
                     type=str, action="store", required=True)
 parser.add_argument('--dependencies', help='Path to json dependencies config file',

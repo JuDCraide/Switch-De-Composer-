@@ -34,11 +34,10 @@ for switch in topology["switches"]:
     f.write('\necho -e "\\n*********************************"\n')
     f.write(f'echo -e "\\n Generating {switch["switchname"]} up4 program "\n')
 
-    line = 'python3 {}/src/generate_switch_program.py --switchname {} --modules {} --filename {} --topology {} --dependencies {} --output-folder {}\n'.format(
+    line = 'python3 {}/src/generate_switch_program.py --switchname {} --modules {} --topology {} --dependencies {} --output-folder {}\n'.format(
         basePath,
         switch["switchname"],
         switch["modules"],
-        switch["filename"],
         topologyJsonLocation,
         dependenciesJsonLocation,
         outputFolder,
