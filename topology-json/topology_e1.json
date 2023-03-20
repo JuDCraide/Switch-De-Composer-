@@ -8,13 +8,13 @@
         },
         {
             "switchname": "s2",
-            "modules": "ipv4",
+            "modules": "ethernet,ipv4",
             "filename": "obs_main.up4",
             "mac" : "00:aa:bb:00:00:02"
         },
         {
             "switchname": "s3",
-            "modules": "ipv6",
+            "modules": "ethernet,ipv6",
             "filename": "obs_main.up4",
             "mac" : "00:aa:bb:00:00:03"
         }

@@ -65,7 +65,6 @@ class Graph(object):
             return 
 
         v = q.popleft()
-        print(v, q)
 
         if v in modules and v not in visited:
             visited.append(v)

@@ -59,7 +59,7 @@ class MultipleSwitchTopo(Topo):
 
         switches = dict()
         for i, switch in enumerate(topology["switches"]):
-            path = './' + switch["switchname"] + '_' + switch["modules"].replace(",","_") + '_main_v1model.json'
+            path = './' + switch["switchname"] + '_main_v1model.json'
             switches[switch["switchname"]] = self.addSwitch(switch["switchname"],
                                              sw_path = sw_path,
                                              json_path = path,
