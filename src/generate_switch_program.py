@@ -3,17 +3,18 @@ import os
 import argparse
 from graph_class import Graph
 import json
-from ip_functions import ConvertIpToInt, ConvertIpToHex, ConvertMacToHex
-from replace_regex import replaceWithRegex
+from specific_functions import Specific_functions
+#from ip_functions import ConvertIpToInt, ConvertIpToHex, ConvertMacToHex
+#from replace_regex import replaceWithRegex
 
 parser = argparse.ArgumentParser(description='One Big Switch program generation')
 parser.add_argument('--switchname', help='Name of the switch that will receive the program',
                     type=str, action="store", required=True)
 parser.add_argument('--modules', help='Name of the modules that will be added to the switch program',
                     type=str, action="store", required=True)
-parser.add_argument('--filename', help='Name of the OBS program that has the module',
-                    type=str, action="store", required=True)
 parser.add_argument('--topology', help='Path to json topology config file',
+                    type=str, action="store", required=True)
+parser.add_argument('--dependencies', help='Path to json dependencies config file',
                     type=str, action="store", required=True)
 parser.add_argument('--output-folder', help='Path to output up4 files',
                     type=str, action="store", required=True)
@@ -25,6 +26,10 @@ topology = open(args.topology, "r")
 with open(args.topology, 'r') as file:
     topology = json.load(file)
 
+
+with open(args.dependencies, 'r') as file:
+    dependencies = json.load(file)
+
 switch = [x for x in topology["switches"] if x["switchname"] == args.switchname][0]
 hosts = [x for x in topology["hosts"] if x["switchname"] == args.switchname]
 output_folder = args.output_folder
@@ -32,74 +37,42 @@ output_folder = args.output_folder
 
 os.system(f"cp $SWITCHDECOMPOSER/modules/* {output_folder}")
 
-#ethernet table
-eth_table = ""
-for host in hosts:
-    eth_table += "(%s) : forward(%s, %s, %s); \n" % (host["port"], ConvertMacToHex(host["mac"]), ConvertMacToHex(switch["mac"]), host["port"])
-#print(eth_table)
-
-#ipv4 table
-ipv4_table = ""
-for host in hosts:
-    ipv4_table += "(%s, _): process(%s); \n" % (ConvertIpToInt(host["ipv4"]),host["port"])
-#print(ipv4_table)
-
-#ipv6 table
-ipv6_table = ""
-for host in hosts:
-    ipv6_table += "(%s, _, _): process(%s); \n" % (ConvertIpToHex(host["ipv6"]),host["port"])
-#print(ipv6_table)
-
-# Ethernet
-with open(output_folder + '/obs_main.up4', 'r') as file :
-  filedata = file.read()
-#filedata = filedata.replace('//@TableInstantiate("ethernet")', eth_table)
-filedata = replaceWithRegex("ethernet", filedata, eth_table)
-with open(output_folder + '/obs_main.up4', 'w') as file:
-  file.write(filedata)
-
-# IPv4
-with open(output_folder + '/ipv4.up4', 'r') as file :
-  filedata = file.read()
-#filedata = filedata.replace('//@TableInstantiate("ipv4")', ipv4_table)
-filedata = replaceWithRegex("ipv4", filedata, ipv4_table)
-with open(output_folder + '/ipv4.up4', 'w') as file:
-  file.write(filedata)
-
-# IPv6
-with open(output_folder + '/ipv6.up4', 'r') as file :
-  filedata = file.read()
-#filedata = filedata.replace('//@TableInstantiate("ipv6")', ipv6_table)
-filedata = replaceWithRegex("ipv6", filedata, ipv6_table)
-with open(output_folder + '/ipv6.up4', 'w') as file:
-  file.write(filedata)
-
-obs_program = open(args.filename, "r")
-
 lines = []
+edges = []
+all = []
+for module in dependencies:
+    all.append(module["name"])
+    for dependency in module["directDependencies"]:
+        edges.append((module["name"], dependency))
+    if "head" in module.keys() and module["head"]:
+        head = module["name"]
+
+graph = Graph(edges, directed=True)
+
+modules = args.modules.split(',')
 if args.modules == 'all':
-    with obs_program as t:
-        lines = t.readlines()
-else:
-    edges = [('ethernet', 'ipv4'), ('ethernet', 'ipv6'), ('ipv4', 'ipv4_nat'), ('ipv6', ''), ('ipv4_nat', '')]
-    graph = Graph(edges, directed=True)
+    modules = all
 
-    modules = args.modules.split(',')
-    # print(modules)
-    dependencies = set()
-    for module in modules:
-        # print(graph.get_dependencies_rec(module))
-        dependencies.update(graph.get_dependencies_rec(module))
-        dependencies.add(module)
-        # print(dependencies)
+order_modules = graph.get_dependency_order(modules)
 
-    dependencies.add('all')
-        
-    with open(args.filename, "r") as file:
+for module_name in order_modules:
+    module = next(obj for obj in dependencies if obj["name"] == module_name)
+
+    filename = module["name"]
+    filepath = output_folder + "/" + module["file"]
+    with open(filepath, "r") as file:
+        filedata = file.read()
+        function = getattr(Specific_functions, module["function"])
+        filedata = function(filedata, hosts, switch) 
+    with open(filepath, 'w') as file:
+        file.write(filedata)
+
+    with open(filepath, "r") as file:
+        lines = []
         can_write = True
         for line in file:
             if '@ModuleDeclareBegin' in line:
-                if any('@ModuleDeclareBegin(\"'+word+'\")' in line for word in dependencies):
+                if any('@ModuleDeclareBegin(\"'+word+'\")' in line for word in order_modules):
                     can_write = True
                 else:
                     can_write = False
@@ -107,7 +80,7 @@ else:
                 can_write = True
 
             if '@ModuleInstantiateBegin' in line:
-                if any('@ModuleInstantiateBegin(\"'+word+'\")' in line for word in dependencies):
+                if any('@ModuleInstantiateBegin(\"'+word+'\")' in line for word in order_modules):
                     can_write = True
                 else:
                     can_write = False
@@ -115,7 +88,7 @@ else:
                 can_write = True
                         
             if '@ModuleInvokeBegin' in line:
-                if any('@ModuleInvokeBegin(\"'+word+'\")' in line for word in dependencies):
+                if any('@ModuleInvokeBegin(\"'+word+'\")' in line for word in order_modules):
                     can_write = True
                 else:
                     can_write = False
@@ -125,9 +98,11 @@ else:
             if(can_write):
                 lines.append(line)
     
-output = open(args.switchname + "_" + args.modules  + "_main.up4", "w")
-for l in lines:
-    if '//' not in l:
-        output.write(l)
-output.close()
+    if filename == head:
+        filepath = output_folder + "/" + args.switchname + "_main.up4"
+
+    with open(filepath, "w") as output:
+        for l in lines:
+            if '//@' not in l:
+                output.write(l)
 

@@ -8,12 +8,11 @@ topologyJsonLocation = f'{basePath}/topology-json/topology_e1.json'
 with open(topologyJsonLocation, 'r') as file:
     topology = json.load(file)
 
+dependenciesPath = f'{basePath}/dependencies-json/'
+
 runMininet = True
 autoRun = True
-allModulesTopology1 = ["ipv4", "ipv6"]
-allModulesTopology2 = ["ipv4_nat_acl","ipv4", "ipv6"]
-allModules = allModulesTopology1
-outputFolder = f'{basePath}/outputs2'
+outputFolder = f'{basePath}/outputs'
 destination = f"{outputFolder}/generated_distribute_programs.sh"
 modules = set()
 
@@ -25,56 +24,63 @@ f.write("export UP4ROOT=${SWITCHDECOMPOSER}/obs-microp4\n")
 f.write('sudo mn -c\n')
 
 for switch in topology["switches"]:
+    dependenciesJsonLocation = dependenciesPath + switch["dependencies"]
+    with open(dependenciesJsonLocation, 'r') as file:
+        dependencies = json.load(file)
+
+    all=[]
+    for module in dependencies:
+        if "head" in module.keys() and module["head"]: continue
+        all.append(module["name"])
+
     f.write('\necho -e "\\n*********************************"\n')
     f.write(f'echo -e "\\n Generating {switch["switchname"]} up4 program "\n')
 
-    line = 'python3 {}/src/generate_switch_program.py --switchname {} --modules {} --filename {} --topology {} --output-folder {}\n'.format(
+    line = 'python3 {}/src/generate_switch_program.py --switchname {} --modules {} --topology {} --dependencies {} --output-folder {}\n'.format(
         basePath,
         switch["switchname"],
         switch["modules"],
-        switch["filename"],
         topologyJsonLocation,
+        dependenciesJsonLocation,
         outputFolder,
     )
     f.write(line)
-    switch["modulesString"] = switch["modules"].replace(",","_")
-    switchModules = switch["modules"].split(",")
-    switch["modulesParsed"] = switchModules
-    for module in switchModules:
-        if (module == "all"):
-            modules.update(allModules)
-            switch["modulesParsed"] = allModules
-            continue
-        else:
-            modules.add(module)
 
     f.write(f'\necho -e "\\n Compiling uP4 includes for {switch["switchname"]}"\n')
+    modules = switch["modules"].split(',')
+    if(switch["modules"] == "all"): 
+        modules = all
     for module in modules:
+        dep_module = next(obj for obj in dependencies if obj["name"] == module)       
+        if "head" in dep_module.keys() and dep_module["head"]: continue
         fixedPart = "${UP4ROOT}/build/p4c-msa -I ${UP4ROOT}/build/p4include"
-        line = '{0} -o {1}.json {2}.up4\n'.format(fixedPart, module, module)
+        line = '{0} -o {1}.json {2}\n'.format(fixedPart, dep_module["name"], dep_module["file"])
         f.write(line)
 
     f.write(f'\necho -e "\\n Compiling uP4 {switch["switchname"]} main program \\n"\n')
     submodules = ""
-    for i, module in enumerate(switch["modulesParsed"]):
-        submodules += module + ".json"
-        if i < len(switch["modulesParsed"])-1:
-            submodules += ","
-        else: submodules += " "
+    modules = switch["modules"].split(',')
+    if(switch["modules"] == "all"): 
+        modules = all
+    for module in modules:        
+        dep_module = next(obj for obj in dependencies if obj["name"] == module)
+        if "head" in dep_module.keys() and dep_module["head"]: continue
+        submodules += dep_module["name"] + ".json,"
+    
+    submodules = submodules.rstrip(',')
     p4cMsa = "${UP4ROOT}/build/p4c-msa"
     p4include = "${UP4ROOT}/build/p4include"
-    line = '{0} --target-arch v1model -I {1}  -l {2}{3}_{4}_main.up4\n'.format(
-        p4cMsa, p4include, submodules, switch["switchname"], switch["modules"])
+    line = '{0} --target-arch v1model -I {1} -l {2} {3}_main.up4\n'.format(
+        p4cMsa, p4include, submodules, switch["switchname"])
     f.write(line)
 
 
 f.write('\necho -e "\\n*********************************"\n')
 f.write('echo -e "\\n Compiling P4 programs "\n')
 for switch in topology["switches"]:
-    line = '{}/src/p4c-compile.sh {}_{}_main_v1model.p4\n'.format(
+    line = '{}/src/p4c-compile.sh {}_main_v1model.p4\n'.format(
         basePath,
-        switch["switchname"], 
-        switch["modulesString"]
+        switch["switchname"]
     )
     f.write(line)
 
