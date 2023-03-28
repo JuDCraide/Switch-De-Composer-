@@ -1,0 +1,61 @@
+{
+    "switches": [
+        {
+            "switchname": "s1",
+            "policies": "path",
+            "dependencies": "dependencies_e1.json",
+            "mac": "00:aa:bb:00:00:01"
+        },
+        {
+            "switchname": "s2",
+            "policies": "path",
+            "dependencies": "dependencies_e1.json",
+            "mac": "00:aa:bb:00:00:02"
+        },
+        {
+            "switchname": "s3",
+            "policies": "path",
+            "dependencies": "dependencies_e1.json",
+            "mac": "00:aa:bb:00:00:03"
+        }
+    ],
+    "hosts":[
+        {
+            "hostname": "h1",
+            "switchname": "s1",
+            "mac": "00:00:00:00:00:01",
+            "ipv6": "2021::1/64",
+            "ipv4": "10.0.1.1/24",
+            "port": "1"
+
+        },
+        {
+            "hostname": "h2",
+            "switchname": "s1",
+            "mac": "00:00:00:00:00:02",
+            "ipv6": "2022::1/64",
+            "ipv4": "10.0.2.1/24",
+            "port": "2"
+        },
+        {
+            "hostname": "h3",
+            "switchname": "s2",
+            "mac": "00:00:00:00:00:03",
+            "ipv6": "2023::1/64",
+            "ipv4": "10.0.3.1/24",
+            "port": "3"
+        },
+        {
+            "hostname": "h4",
+            "switchname": "s3",
+            "mac": "00:00:00:00:00:04",
+            "ipv6": "2024::1/64",
+            "ipv4": "10.0.4.1/24",
+            "port": "4"
+        }
+    ],
+    "switchlink":[
+        ["s1", "s2"],
+        ["s1", "s3"]
+    ]
+}
