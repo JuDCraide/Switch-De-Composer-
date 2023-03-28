@@ -7,3 +7,10 @@ def replaceWithRegex(module_name, base_string, string_to_replace):
     if result:
         return result
     return base_string
+
+def findRegex(regex, base_string):
+    result = re.search(regex, base_string, re.MULTILINE)
+ 
+    if result:
+        return True
+    return False

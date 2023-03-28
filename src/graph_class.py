@@ -46,6 +46,15 @@ class Graph(object):
                     dependencies.add(item)
         # print(dependencies)
         return dependencies
+    
+    def get_dependencies_from_array(self, modules):
+        dependencies = set()
+        dependencies.update(modules)
+
+        for v in modules:
+            dependencies.update(self.get_dependencies_rec(v))
+            
+        return list(dependencies)
 
 
     def __len__(self):
@@ -86,3 +95,5 @@ class Graph(object):
             raise Exception("Missing module dependency on the switch configuration. Please ensure topology.json and dependencies.json are properly configured.")
 
         return visited[::-1]
+
+    

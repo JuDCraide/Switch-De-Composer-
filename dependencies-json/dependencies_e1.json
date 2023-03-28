@@ -4,18 +4,21 @@
         "file": "obs_main.up4",
         "function": "ethernet",
         "directDependencies": ["ipv4", "ipv6"],
+        "regex": ["ethernet"],
         "head":true
     },
     {
         "name": "ipv4",
         "file": "ipv4.up4",
         "function": "ipv4",
-        "directDependencies": []
+        "directDependencies": [],
+        "regex": ["ipv4"]
     },
     {
         "name": "ipv6",
         "file": "ipv6.up4",
         "function": "ipv6",
-        "directDependencies": []
+        "directDependencies": [],
+        "regex": ["ipv6"]
     }
 ]

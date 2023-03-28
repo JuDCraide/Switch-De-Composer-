@@ -1,20 +1,23 @@
 import json
 import os
-import subprocess
+#import subprocess
+from graph_class import Graph
+from policies import get_modules_from_policies
 
 basePath = os.getcwd()
 
-topologyJsonLocation = f'{basePath}/topology-json/topology_e1.json'
+topologyJsonLocation = f'{basePath}/topology-json/topology_e1_with_policies.json'
+#topologyJsonLocation = f'{basePath}/topology-json/topology_e1.json'
 with open(topologyJsonLocation, 'r') as file:
     topology = json.load(file)
 
-dependenciesPath = f'{basePath}/dependencies-json/'
-
 runMininet = True
 autoRun = True
+dependenciesPath = f'{basePath}/dependencies-json/'
+policiesPath = f'{basePath}/policies/'
 outputFolder = f'{basePath}/outputs'
 destination = f"{outputFolder}/generated_distribute_programs.sh"
-modules = set()
+
 
 f = open(destination, "w+")
 
@@ -28,18 +31,39 @@ for switch in topology["switches"]:
     with open(dependenciesJsonLocation, 'r') as file:
         dependencies = json.load(file)
 
-    all=[]
+    modules = []
+    if("modules" in switch.keys() and switch["modules"]):
+        if(switch["modules"] == "all"):         
+            all=[]
+            for module in dependencies:
+                if ("head" in module.keys() and module["head"]): continue
+                all.append(module["name"])
+            modules = all
+        else:
+            modules = switch["modules"].split(',')
+    elif("policies" in switch.keys() and switch["policies"]):
+        policiesLocation = policiesPath + switch["policies"]
+        modules = get_modules_from_policies(policiesLocation, dependencies)    
+    
+    edges = []
     for module in dependencies:
-        if "head" in module.keys() and module["head"]: continue
-        all.append(module["name"])
+        for dependency in module["directDependencies"]:
+            edges.append((module["name"], dependency))
+        if "head" in module.keys() and module["head"]:
+            head = module["name"]
+
+    graph = Graph(edges, directed=True)
+    modules = graph.get_dependencies_from_array(modules)
+    modules = graph.get_dependency_order(modules)
 
     f.write('\necho -e "\\n*********************************"\n')
     f.write(f'echo -e "\\n Generating {switch["switchname"]} up4 program "\n')
 
-    line = 'python3 {}/src/generate_switch_program.py --switchname {} --modules {} --topology {} --dependencies {} --output-folder {}\n'.format(
+    line = 'python3 {}/src/generate_switch_program.py --switchname {} --modules {} --head {} --topology {} --dependencies {} --output-folder {}\n'.format(
         basePath,
         switch["switchname"],
-        switch["modules"],
+        ','.join(modules),
+        head,
         topologyJsonLocation,
         dependenciesJsonLocation,
         outputFolder,
@@ -47,9 +71,6 @@ for switch in topology["switches"]:
     f.write(line)
 
     f.write(f'\necho -e "\\n Compiling uP4 includes for {switch["switchname"]}"\n')
-    modules = switch["modules"].split(',')
-    if(switch["modules"] == "all"): 
-        modules = all
     for module in modules:
         dep_module = next(obj for obj in dependencies if obj["name"] == module)       
         if "head" in dep_module.keys() and dep_module["head"]: continue
@@ -59,9 +80,6 @@ for switch in topology["switches"]:
 
     f.write(f'\necho -e "\\n Compiling uP4 {switch["switchname"]} main program \\n"\n')
     submodules = ""
-    modules = switch["modules"].split(',')
-    if(switch["modules"] == "all"): 
-        modules = all
     for module in modules:        
         dep_module = next(obj for obj in dependencies if obj["name"] == module)
         if "head" in dep_module.keys() and dep_module["head"]: continue
