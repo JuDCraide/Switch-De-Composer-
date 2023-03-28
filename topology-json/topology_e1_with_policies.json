@@ -2,19 +2,19 @@
     "switches": [
         {
             "switchname": "s1",
-            "policies": "path",
+            "policies": "s1_policy_e1.txt",
             "dependencies": "dependencies_e1.json",
             "mac": "00:aa:bb:00:00:01"
         },
         {
             "switchname": "s2",
-            "policies": "path",
+            "policies": "s2_policy_e1.txt",
             "dependencies": "dependencies_e1.json",
             "mac": "00:aa:bb:00:00:02"
         },
         {
             "switchname": "s3",
-            "policies": "path",
+            "policies": "s3_policy_e1.txt",
             "dependencies": "dependencies_e1.json",
             "mac": "00:aa:bb:00:00:03"
         }
