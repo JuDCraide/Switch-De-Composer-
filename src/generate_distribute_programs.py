@@ -44,7 +44,7 @@ else:
     policiesPath = f'{basePath}/policies/'
 
 if(args.output_folder):
-    outputFolder = f"{args.output_folder.rstrip('/')}/"
+    outputFolder = args.output_folder.rstrip('/')
 else:
     outputFolder = f'{basePath}/outputs'
 
