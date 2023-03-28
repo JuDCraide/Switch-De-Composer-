@@ -1,24 +1,54 @@
 import json
 import os
-#import subprocess
+import argparse
 from graph_class import Graph
 from policies import get_modules_from_policies
 
+
+parser = argparse.ArgumentParser(description='One Big Switch program generation')
+parser.add_argument('--topology-path', help='Path to the topology JSON file',
+                    type=str, action="store", required=False)
+parser.add_argument('--dependencies-folder-path', help='Path to the folder with the dependencies graph JSON',
+                    type=str, action="store", required=False)
+parser.add_argument('--policies-folder-path', help='Path to the folder with the policies file',
+                    type=str, action="store", required=False)
+parser.add_argument('--output-folder', help='Path to the folder where the switches will be generated',
+                    type=str, action="store", required=False)
+parser.add_argument('--mininet', help='Boolean if should run Mininet test',
+                    type=bool, action="store", required=False, default=True)
+parser.add_argument('--auto-run', help='Boolean if should automatically run generate the switches',
+                    type=bool, action="store", required=False, default=True)
+
+args = parser.parse_args()
+
 basePath = os.getcwd()
 
-topologyJsonLocation = f'{basePath}/topology-json/topology_e1_with_policies.json'
-#topologyJsonLocation = f'{basePath}/topology-json/topology_e1.json'
+if(args.topology_path):
+    topologyJsonLocation = args.topology_path
+else:
+    topologyJsonLocation = f'{basePath}/topology-json/topology_e1.json'
 with open(topologyJsonLocation, 'r') as file:
     topology = json.load(file)
 
-runMininet = True
-autoRun = True
-dependenciesPath = f'{basePath}/dependencies-json/'
-policiesPath = f'{basePath}/policies/'
-outputFolder = f'{basePath}/outputs'
+runMininet = args.mininet
+autoRun = args.auto_run
+
+if(args.dependencies_folder_path):
+    dependenciesPath = f"{args.dependencies_folder_path.rstrip('/')}/"
+else:
+    dependenciesPath = f'{basePath}/dependencies-json/'
+
+if(args.policies_folder_path):
+    policiesPath = f"{args.policies_folder_path.rstrip('/')}/"
+else:
+    policiesPath = f'{basePath}/policies/'
+
+if(args.output_folder):
+    outputFolder = f"{args.output_folder.rstrip('/')}/"
+else:
+    outputFolder = f'{basePath}/outputs'
+
 destination = f"{outputFolder}/generated_distribute_programs.sh"
-
-
 f = open(destination, "w+")
 
 f.write(f"export SWITCHDECOMPOSER={basePath}\n")
