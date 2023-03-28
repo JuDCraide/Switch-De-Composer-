@@ -4,8 +4,6 @@ import argparse
 from graph_class import Graph
 import json
 from specific_functions import Specific_functions
-#from ip_functions import ConvertIpToInt, ConvertIpToHex, ConvertMacToHex
-#from replace_regex import replaceWithRegex
 
 parser = argparse.ArgumentParser(description='One Big Switch program generation')
 parser.add_argument('--switchname', help='Name of the switch that will receive the program',
