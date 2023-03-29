@@ -57,7 +57,10 @@ f.write("export UP4ROOT=${SWITCHDECOMPOSER}/obs-microp4\n")
 f.write('sudo mn -c\n')
 
 for switch in topology["switches"]:
-    dependenciesJsonLocation = dependenciesPath + switch["dependencies"]
+    if "dependencies" in switch.keys() and switch["dependencies"]:
+        dependenciesJsonLocation = dependenciesPath + switch["dependencies"]
+    else:
+        dependenciesJsonLocation = dependenciesPath + "dependencies_e1.json"
     with open(dependenciesJsonLocation, 'r') as file:
         dependencies = json.load(file)
 
