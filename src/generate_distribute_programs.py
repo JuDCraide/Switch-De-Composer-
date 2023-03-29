@@ -14,10 +14,13 @@ parser.add_argument('--policies-folder-path', help='Path to the folder with the 
                     type=str, action="store", required=False)
 parser.add_argument('--output-folder', help='Path to the folder where the switches will be generated',
                     type=str, action="store", required=False)
-parser.add_argument('--mininet', help='Boolean if should run Mininet test',
-                    type=bool, action="store", required=False, default=True)
-parser.add_argument('--auto-run', help='Boolean if should automatically run generate the switches',
-                    type=bool, action="store", required=False, default=True)
+
+parser.add_argument('--not-run-mininet', help='Boolean if don\'t want to run Mininet test',
+                    action="store_true", required=False, default=False)
+parser.add_argument('--separate-mininet', help='Boolean if should put Mininet test on separate shell script',
+                    action="store_true", required=False, default=False)
+parser.add_argument('--not-auto-run', help='Boolean if don\'t want to automatically run generate switches',
+                    action="store_true", required=False, default=False)
 
 args = parser.parse_args()
 
@@ -30,8 +33,9 @@ else:
 with open(topologyJsonLocation, 'r') as file:
     topology = json.load(file)
 
-runMininet = args.mininet
-autoRun = args.auto_run
+runMininet = not args.not_run_mininet
+separateMininet = args.separate_mininet
+autoRun = not args.not_auto_run
 
 if(args.dependencies_folder_path):
     dependenciesPath = f"{args.dependencies_folder_path.rstrip('/')}/"
@@ -153,17 +157,67 @@ if(runMininet):
     f.write(f'--topology-json {topologyJsonLocation}')
     f.write('"\n')
 
-f.write('\necho -e "\n*********************************\\n${normal}"\n')
+f.write('\necho -e "\\n*********************************\\n${normal}"\n')
 f.write('echo -e "\\n Remove Intermediate Files \\n"\n')
 f.write('rm *.p4i\n')
 f.write('rm *.p4rt\n')
 f.write('rm *.json\n')
 f.write('rm *.up4\n')
 
-f.write('\necho -e "\\n*********************************"\n')
+f.write('echo -e "\\n*********************************"\n')
 f.close()
 
 os.chmod(destination, 0o755)
 if(autoRun):
     os.chdir(outputFolder)
     os.system("bash -c ./generated_distribute_programs.sh")
+
+
+
+if separateMininet:
+    mininetDestination = f"{outputFolder}/mininet.sh"
+    mf = open(mininetDestination, "w+")
+
+    mf.write(f"export SWITCHDECOMPOSER={basePath}\n")
+    mf.write("export UP4ROOT=${SWITCHDECOMPOSER}/obs-microp4\n")
+
+    mf.write('sudo mn -c\n')
+
+    mf.write('\necho -e "\\n*********************************"\n')
+    mf.write('echo -e "\\n Compiling P4 programs "\n')
+    for switch in topology["switches"]:
+        line = '{}/src/p4c-compile.sh {}_main_v1model.p4\n'.format(
+            basePath,
+            switch["switchname"]
+        )
+        mf.write(line)
+
+    mf.write('\nbold=$(tput bold)\n')
+    mf.write('normal=$(tput sgr0)\n')
+
+    mf.write('\nBMV2_MININET_PATH=./\n')
+    mf.write('BMV2_SIMPLE_SWITCH_BIN=${UP4ROOT}/extensions/csa/msa-examples/bmv2/targets/simple_switch/simple_switch\n')
+
+    mf.write('\nP4_MININET_PATH=${UP4ROOT}/extensions/csa/msa-examples/bmv2/mininet\n')
+
+    mf.write('\necho -e "${bold}\\n*********************************"\n')
+    mf.write('echo -e "Running Tutorial program: obs_example_v1model${normal}"\n')
+    mf.write('sudo bash -c "')
+    mf.write('export P4_MININET_PATH=${P4_MININET_PATH}; ')
+    mf.write(f'{basePath}/src/topology_mininet.py ')
+    mf.write('--behavioral-exe $BMV2_SIMPLE_SWITCH_BIN ')
+    mf.write(f'--topology-json {topologyJsonLocation}')
+    mf.write('"\n')
+
+    mf.write('\necho -e "\\n*********************************\\n${normal}"\n')
+    mf.write('echo -e "\\n Remove Intermediate Files \\n"\n')
+    mf.write('rm *.p4i\n')
+    mf.write('rm *.p4rt\n')
+    mf.write('rm *.json\n')
+    mf.write('rm *.up4\n')
+
+    mf.write('echo -e "\\n*********************************"\n')
+    mf.close()
+
+    os.chmod(mininetDestination, 0o755)
+

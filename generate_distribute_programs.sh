@@ -3,7 +3,9 @@ python3 ./src/generate_distribute_programs.py \
 --dependencies-folder-path "/home/p4/new-switch-de-composer/dependencies-json" \
 --policies-folder-path "/home/p4/new-switch-de-composer/policies" \
 --output-folder "/home/p4/new-switch-de-composer/outputs" \
---mininet True \
---auto-run True 
+--separate-mininet \
+--not-run-mininet \
+--not-auto-run \
+
 
 #python3 ./src/generate_distribute_programs.py "$@"
