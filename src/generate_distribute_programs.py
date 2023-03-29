@@ -5,7 +5,7 @@ from graph_class import Graph
 from policies import get_modules_from_policies
 
 
-parser = argparse.ArgumentParser(description='One Big Switch program generation')
+parser = argparse.ArgumentParser(description='Switch (De)Composer program generation')
 parser.add_argument('--topology-path', help='Path to the topology JSON file',
                     type=str, action="store", required=False)
 parser.add_argument('--dependencies-folder-path', help='Path to the folder with the dependencies graph JSON',
